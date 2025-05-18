@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Witaj w MiniShop</h1>
+    {% if user %}
+        <p>Zalogowany jako: <strong>{{ user.username }}</strong></p>
+    {% else %}
+        <p>Miło Cię widzieć! Zaloguj się lub zarejestruj, aby przeglądać produkty.</p>
+    {% endif %}
+{% endblock %}
