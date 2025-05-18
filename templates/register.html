@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
     <h2>Rejestracja</h2>
-    <form method="post">
+    <form method="post" action="/register">
         <label>Login: <input type="text" name="username" required></label><br>
         <label>Hasło: <input type="password" name="password" required></label><br>
         <button type="submit">Zarejestruj</button>

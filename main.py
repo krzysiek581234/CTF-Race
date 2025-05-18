@@ -1,114 +1,45 @@
-from fastapi import FastAPI, Request, Form, HTTPException, status
+from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from jose import jwt, JWTError
-from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from typing import Dict, Optional
+from pathlib import Path
+from sqlmodel import Session, select
 
-app = FastAPI(title="MiniShop")
+from .db import init_db, get_session
+from .auth import router as auth_router, get_current_user
+from .models import Product
+
+BASE_DIR = Path(__file__).resolve().parent
+
+app = FastAPI(title="MiniShop SQL")
 
 # Static & Templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
-# JWT konfiguracja
-SECRET_KEY = "CHANGE_ME_TO_SECRET_KEY"  # ← podmień na losowy, silny klucz
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Startup
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
-# Hashowanie haseł
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Include auth routes
+app.include_router(auth_router)
 
-# "Baza" danych w pamięci (na start wystarczy)
-fake_users_db: Dict[str, Dict[str, str]] = {}
-fake_products_db = [
-    {"id": 1, "name": "Laptop", "description": "Ultralekki laptop", "price": 3999},
-    {"id": 2, "name": "Smartphone", "description": "Flagowy telefon", "price": 2999},
-    {"id": 3, "name": "Słuchawki", "description": "Bezprzewodowe słuchawki", "price": 599},
-]
-
-# -------------- Pomocnicze --------------
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def get_current_user(request: Request) -> Optional[Dict[str, str]]:
-    """Zwraca słownik użytkownika lub None."""
-    token = request.cookies.get("access_token")
-    if not token:
-        return None
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            return None
-        return fake_users_db.get(username)
-    except JWTError:
-        return None
-
-# -------------- Routy publiczne --------------
+# ---- routes ----
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    user = get_current_user(request)
+def home(request: Request, user=Depends(get_current_user)):
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
-@app.get("/register", response_class=HTMLResponse)
-async def register_get(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
-
-@app.post("/register")
-async def register_post(username: str = Form(...), password: str = Form(...)):
-    if username in fake_users_db:
-        raise HTTPException(status_code=400, detail="Użytkownik już istnieje.")
-    fake_users_db[username] = {
-        "username": username,
-        "hashed_password": hash_password(password),
-    }
-    return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
-
-@app.get("/login", response_class=HTMLResponse)
-async def login_get(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
-@app.post("/login")
-async def login_post(username: str = Form(...), password: str = Form(...)):
-    user = fake_users_db.get(username)
-    if not user or not verify_password(password, user["hashed_password"]):
-        raise HTTPException(status_code=400, detail="Nieprawidłowe dane logowania.")
-    access_token = create_access_token(data={"sub": username})
-    response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax",
-    )
-    return response
-
-@app.get("/logout")
-async def logout():
-    response = RedirectResponse(url="/")
-    response.delete_cookie("access_token")
-    return response
-
-# -------------- Routy chronione --------------
 @app.get("/products", response_class=HTMLResponse)
-async def products(request: Request):
-    user = get_current_user(request)
+def products(
+    request: Request,
+    user=Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
     if user is None:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    products = session.exec(select(Product)).all()
     return templates.TemplateResponse(
         "products.html",
-        {"request": request, "products": fake_products_db, "user": user},
+        {"request": request, "user": user, "products": products},
     )
