@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+# from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from sqlmodel import Session, select
@@ -8,6 +8,9 @@ from sqlmodel import Session, select
 from .db import init_db, get_session
 from .auth import router as auth_router, get_current_user
 from .models import Product
+from .rewards import router as rewards_router
+from .templating import templates         
+from .shop import router as shop_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -15,7 +18,7 @@ app = FastAPI(title="MiniShop SQL")
 
 # Static & Templates
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+# templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # Startup
 @app.on_event("startup")
@@ -24,7 +27,8 @@ def on_startup():
 
 # Include auth routes
 app.include_router(auth_router)
-
+app.include_router(rewards_router) 
+app.include_router(shop_router)
 # ---- routes ----
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request, user=Depends(get_current_user)):

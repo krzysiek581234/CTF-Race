@@ -22,11 +22,18 @@ def seed_products() -> None:
         exists = session.exec(select(Product)).first()
         if exists:
             return
-        session.add_all(
-            [
-                Product(name="Laptop", description="Ultralekki laptop", price=3999),
-                Product(name="Smartphone", description="Flagowy telefon", price=2999),
-                Product(name="Słuchawki", description="Bezprzewodowe słuchawki", price=599),
-            ]
-        )
+        session.add_all([
+            Product(
+                name="Flaga",
+                description="Tylko dla najlepszych wyjadaczy",
+                price=100,
+                secret_text="FLAG{Szybkość_i_Precyzja}"
+            ),
+            Product(
+                name="Darmowa wskazówka",
+                description="Może się przydać, ale nie musi",
+                price=10,
+                secret_text="HINT{Sprawdź_logi_serwera}"
+            ),
+        ])
         session.commit()

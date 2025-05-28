@@ -1,9 +1,37 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block flash %}
+  {% set msg = request.query_params.get('msg') %}
+  {% if msg %}
+    <section class="flash-message">
+      {% if msg in ['register_ok', 'redeem_success', 'login_ok'] %}
+        <div class="good">Operacja zakończona sukcesem!</div>
+      {% elif msg in ['user_exists', 'wrong_code'] %}
+        <div class="warn">Wystąpił błąd: {{ msg }}</div>
+      {% elif msg in ['already_redeemed'] %}
+        <div class="info">Kod był już użyty.</div>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}
+
 {% block content %}
-    <h1>Witaj w MiniShop</h1>
-    {% if user %}
-        <p>Zalogowany jako: <strong>{{ user.username }}</strong></p>
-    {% else %}
-        <p>Miło Cię widzieć! Zaloguj się lub zarejestruj, aby przeglądać produkty.</p>
-    {% endif %}
+  <h1>Witaj w MiniShop</h1>
+
+  {% if user %}
+      <p>Cześć, <strong>{{ user.username }}</strong>!</p>
+
+      {% if not user.code_redeemed %}
+          <p>Twój kod: <strong>{{ user.activation_code }}</strong></p>
+
+          <form action="/redeem" method="post">
+              <input type="text" name="code" placeholder="Wpisz kod" required>
+              <button class="redeem-btn" type="submit">Aktywuj +10 pkt</button>
+          </form>
+      {% else %}
+          <p>Masz już <strong>{{ user.points }}</strong> punktów.</p>
+      {% endif %}
+  {% else %}
+      <p>Zaloguj się lub zarejestruj, aby zdobywać punkty.</p>
+  {% endif %}
 {% endblock %}

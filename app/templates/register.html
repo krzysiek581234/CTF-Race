@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
     <h2>Rejestracja</h2>
+    <p>Minimalna długość hasła 4 znaki</p>
+    <p>email musi zawiera @</p>
     <form method="post" action="/register">
-        <label>Login: <input type="text" name="username" required></label><br>
+        <label>Email: <input type="text" name="username" required></label><br>
         <label>Hasło: <input type="password" name="password" required></label><br>
         <button type="submit">Zarejestruj</button>
     </form>
+    {% if request.query_params.get('msg') %}
+  <p class="flash {{ request.query_params.get('msg') }}">{{ request.query_params.get('msg') }}</p>
+    {% endif %}
 {% endblock %}

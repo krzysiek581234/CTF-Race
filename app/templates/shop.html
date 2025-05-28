@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Sklep za punkty</h1>
+
+{% if user %}
+    <p>Masz {{ user.points }} pkt</p>
+    {% for item in products %}
+        <div class="card">
+            <h3>{{ item.name }} — {{ item.price }} pkt</h3>
+            <p>{{ item.description }}</p>
+            <form action="/shop/buy/{{ item.id }}" method="post">
+                <button {% if user.points < item.price %}disabled{% endif %}>
+                    Kup
+                </button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Zaloguj się, aby kupować.</p>
+{% endif %}
+{% endblock %}

@@ -10,14 +10,23 @@
         <nav>
             <a href="/">Strona główna</a>
             {% if user %}
-                <a href="/products">Produkty</a>
-                <a href="/logout">Wyloguj</a>
+                <!-- <a href="/products">Produkty</a> -->
+                
+                <a href="/shop">Sklep</a>
+                <a href="/shop/secrets">Moje sekrety</a>
+                <form action="/logout" method="post" class="logout-form">
+                    
+                    <button type="submit" class="logout-btn">Wyloguj</button>
+                </form>
+                <span class="points">Punkty: {{ user.points }}</span>
             {% else %}
                 <a href="/login">Logowanie</a>
                 <a href="/register">Rejestracja</a>
             {% endif %}
+            
         </nav>
     </header>
+    {% block flash %}{% endblock %}
     <section class="content">
         {% block content %}{% endblock %}
     </section>

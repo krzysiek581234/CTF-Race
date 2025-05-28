@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "app.main:app",  // <- poprawiony import aplikacji
+                "--reload"
+            ],
+            "jinja": true,
+            "justMyCode": false,        // <- dodaj to, by breakpointy działały też w zależnościach
+            "console": "integratedTerminal"  // <- opcjonalnie, lepsza kontrola wejścia/wyjścia
+        }
+    ]
+}

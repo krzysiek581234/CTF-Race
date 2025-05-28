@@ -2,3 +2,51 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
 header { background: #333; padding: 1rem; }
 header nav a { color: #fff; margin-right: 1rem; text-decoration: none; }
 .content { padding: 1rem; }
+
+.flash           { margin: 1rem 0; padding: .5rem 1rem; border-radius: .4rem; }
+.flash.login_ok,
+.flash.register_ok { background: #c8e6c9; }
+.flash.logout_ok  { background: #bbdefb; }
+.flash.invalid_credentials,
+.flash.invalid_email,
+.flash.password_short,
+.flash.user_exists { background: #ffcdd2; }
+
+
+/* --- NAVIGATION BUTTON --- */
+.logout-form {
+  display: inline;          /* przycisk zachowuje się jak link obok */
+  margin: 0;                /* wyzeruj domyślne odstępy formularza */
+}
+
+.logout-btn {
+  background: #ff7043;      /* żywy, pomarańczowy akcent */
+  color: #ffffff;
+  padding: .45rem 1.1rem;
+  border: none;
+  border-radius: .5rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.logout-btn:hover {
+  background: #f4511e;      /* subtelne przyciemnienie */
+  transform: translateY(-2px);
+}
+
+.logout-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.logout-btn:active {
+  transform: translateY(0); /* kliknięcie „wciska” przycisk */
+}
+
+.points {
+  margin: 0 .8rem;
+  font-weight: 600;
+  color: #4caf50;
+}

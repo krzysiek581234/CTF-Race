@@ -6,4 +6,8 @@
         <label>Hasło: <input type="password" name="password" required></label><br>
         <button type="submit">Zaloguj</button>
     </form>
+    {% if request.query_params.get('msg') %}
+  <p class="flash {{ request.query_params.get('msg') }}">{{ request.query_params.get('msg') }}</p>
+    {% endif %}
+
 {% endblock %}
