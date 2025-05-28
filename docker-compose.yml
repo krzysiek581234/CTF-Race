@@ -6,14 +6,12 @@ services:
     container_name: race_ctf_app
     restart: unless-stopped
 
-    # Ładujemy sekrety bez wypychania ich do obrazu
     env_file:
       - .env
 
-    # Trzymając bazę na wolumenie, nie stracisz flag ani użytkowników
     volumes:
-      - ./:/app
-      - ./database.db:/app/database.db
+      - ./:/app              # kod źródłowy
+      - ./database.db:/app/database.db  # stan bazy (zostanie skasowany przy starcie)
 
     ports:
       - "8000:8000"

@@ -1,22 +1,24 @@
-# ---------- Base image ----------
 FROM python:3.12-slim
 
-# ---------- OS dependencies (kompilatory, nagłówki) ----------
+# --- deps ---
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential libpq-dev curl \
     && rm -rf /var/lib/apt/lists/*
 
-# ---------- Workdir ----------
 WORKDIR /app
 
-# ---------- Python deps ----------
 COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# ---------- Project files ----------
+# --- pliki projektu ---
 COPY . .
 
-# ---------- Port & launch ----------
+# --- skrypt wejściowy ---
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# --- port / komenda ---
 EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
